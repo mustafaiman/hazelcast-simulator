@@ -15,19 +15,27 @@
  */
 package com.hazelcast.simulator.tests.map.domain;
 
-import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
 
-public class IdentifiedDataSerializableDomainObject extends DataSerializableDomainObject implements IdentifiedDataSerializable {
+import java.io.IOException;
 
-    static final int CLASS_ID = 1;
+public class DSTweetObject extends AbstractTweetObject implements DataSerializable {
 
     @Override
-    public int getId() {
-        return CLASS_ID;
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeUTF(createdAt);
+        out.writeUTF(idStr);
+        out.writeUTF(text);
+        out.writeObject(user);
     }
 
     @Override
-    public int getFactoryId() {
-        return IdentifiedDataSerializableObjectFactory.FACTORY_ID;
+    public void readData(ObjectDataInput in) throws IOException {
+        createdAt = in.readUTF();
+        idStr = in.readUTF();
+        text = in.readUTF();
+        user = in.readObject();
     }
 }

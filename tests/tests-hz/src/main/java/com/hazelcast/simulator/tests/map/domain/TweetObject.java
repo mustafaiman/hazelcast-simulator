@@ -16,25 +16,20 @@
 package com.hazelcast.simulator.tests.map.domain;
 
 @SuppressWarnings("unused")
-public interface DomainObject {
+public interface TweetObject {
+    String getCreatedAt();
 
-    String getKey();
+    void setCreatedAt(String createdAt);
 
-    void setKey(String key);
+    String getIdStr();
 
-    String getStringVal();
+    void setIdStr(String idStr);
 
-    void setStringVal(String stringVal);
+    String getText();
 
-    double getDoubleVal();
+    void setText(String text);
 
-    void setDoubleVal(double doubleVal);
+    TweetUserObject getUser();
 
-    long getLongVal();
-
-    void setLongVal(long longVal);
-
-    int getIntVal();
-
-    void setIntVal(int intVal);
+    void setUser(TweetUserObject user);
 }

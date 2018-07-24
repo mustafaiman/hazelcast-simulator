@@ -15,24 +15,19 @@
  */
 package com.hazelcast.simulator.tests.map.domain;
 
-import com.hazelcast.nio.serialization.DataSerializableFactory;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 
-public class IdentifiedDataSerializableObjectFactory implements DataSerializableFactory {
+public class IDSTweetObject extends DSTweetObject implements IdentifiedDataSerializable {
 
-    static final int FACTORY_ID = 4000;
+    static final int CLASS_ID = 1;
 
     @Override
-    public IdentifiedDataSerializable create(int typeId) {
-        switch (typeId) {
-            case IDSTweetObject.CLASS_ID:
-                return new IDSTweetObject();
-            case IDSTweetLocationObject.CLASS_ID:
-                return new IDSTweetLocationObject();
-            case IDSTweetUserObject.CLASS_ID:
-                return new IDSTweetUserObject();
-            default:
-                throw new IllegalArgumentException("Unknown type id " + typeId);
-        }
+    public int getId() {
+        return CLASS_ID;
+    }
+
+    @Override
+    public int getFactoryId() {
+        return IdentifiedDataSerializableObjectFactory.FACTORY_ID;
     }
 }
