@@ -25,64 +25,90 @@ import com.hazelcast.simulator.tests.helpers.KeyLocality;
 import com.hazelcast.simulator.worker.loadsupport.Streamer;
 import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import static com.hazelcast.simulator.tests.helpers.HazelcastTestUtils.waitClusterSize;
 import static com.hazelcast.simulator.tests.helpers.KeyUtils.generateIntKeys;
 
 public class IntIntMapTest extends HazelcastTest {
-
     // properties
-    public int keyCount = 10000;
-    public int hotKeyCount = 100;
-    public KeyLocality keyLocality = KeyLocality.SHARED;
+    public int keyCount = 1000000;
+    public int expirableMapCount = 5;
     public int minNumberOfMembers = 0;
+    public int notExpirableMapCount = 5;
+    public String expirableMapPrefix = "expirable.";
+    public KeyLocality keyLocality = KeyLocality.SHARED;
 
-    private IMap<Integer, Integer> map;
     private int[] keys;
+    private List<IMap<Integer,Integer>> maps;
 
     @Setup
     public void setUp() {
-        map = targetInstance.getMap(name);
+        maps = new ArrayList<IMap<Integer,Integer>>();
+
+        for (int i = 0; i < expirableMapCount; i++) {
+            maps.add(targetInstance.<Integer, Integer>getMap(expirableMapPrefix + name + i));
+        }
+
+        for (int i = 0; i < notExpirableMapCount; i++) {
+            maps.add(targetInstance.<Integer, Integer>getMap(notExpirableMapCount + name + i));
+        }
     }
 
     @Prepare(global = false)
     public void prepare() {
         waitClusterSize(logger, targetInstance, minNumberOfMembers);
         keys = generateIntKeys(keyCount, keyLocality, targetInstance);
-        Streamer<Integer, Integer> streamer = StreamerFactory.getInstance(map);
-        Random random = new Random();
-        for (int key : keys) {
-            int value = random.nextInt(Integer.MAX_VALUE);
-            streamer.pushEntry(key, value);
+
+        for (IMap map : maps) {
+            Streamer<Integer, Integer> streamer = StreamerFactory.getInstance(map);
+            Random random = new Random();
+            for (int key : keys) {
+                int value = random.nextInt(Integer.MAX_VALUE);
+                streamer.pushEntry(key, value);
+            }
+            streamer.await();
         }
-        streamer.await();
+    }
+
+    IMap<Integer,Integer> getRandomMap(ThreadState state) {
+        return maps.get(state.randomInt(expirableMapCount + notExpirableMapCount));
+    }
+
+    @TimeStep(prob = 0.1)
+    public Integer keySet(ThreadState state) {
+        Set<Integer> keySet = getRandomMap(state).keySet();
+        return keySet.size();
+    }
+
+    @TimeStep(prob = 0.1)
+    public Integer entrySet(ThreadState state) {
+        Set<Map.Entry<Integer, Integer>> entrySet = getRandomMap(state).entrySet();
+        return entrySet.size();
     }
 
     @TimeStep(prob = 0.1)
     public Integer put(ThreadState state) {
         int key = state.randomKey();
         int value = state.randomValue();
-        return map.put(key, value);
+        return getRandomMap(state).put(key, value);
     }
 
     @TimeStep(prob = 0)
     public void set(ThreadState state) {
         int key = state.randomKey();
         int value = state.randomValue();
-        map.set(key, value);
+        getRandomMap(state).set(key, value);
     }
 
     @TimeStep(prob = -1)
     public Integer get(ThreadState state) {
         int key = state.randomKey();
-        return map.get(key);
-    }
-
-    @TimeStep(prob = 0)
-    public Integer hotGet(ThreadState state) {
-        int key = state.randomHotKey();
-        return map.get(key);
+        return getRandomMap(state).get(key);
     }
 
     public class ThreadState extends BaseThreadState {
@@ -91,13 +117,8 @@ public class IntIntMapTest extends HazelcastTest {
             return keys[randomInt(keys.length)];
         }
 
-        private int randomHotKey() {
-            return keys[randomInt(hotKeyCount)];
-        }
-
         private int randomValue() {
             return randomInt(Integer.MAX_VALUE);
         }
     }
-
 }
