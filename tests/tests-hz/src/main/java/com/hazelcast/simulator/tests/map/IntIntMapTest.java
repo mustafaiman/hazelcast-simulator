@@ -35,28 +35,34 @@ import static com.hazelcast.simulator.tests.helpers.HazelcastTestUtils.waitClust
 import static com.hazelcast.simulator.tests.helpers.KeyUtils.generateIntKeys;
 
 public class IntIntMapTest extends HazelcastTest {
+
+    public static final String EXPIRABLE_MAP_PREFIX = "expirable.";
+
     // properties
     public int keyCount = 1000000;
     public int expirableMapCount = 5;
     public int minNumberOfMembers = 0;
     public int notExpirableMapCount = 5;
-    public String expirableMapPrefix = "expirable.";
     public KeyLocality keyLocality = KeyLocality.SHARED;
 
     private int[] keys;
-    private List<IMap<Integer,Integer>> maps;
+    private List<IMap<Integer, Integer>> maps;
 
     @Setup
     public void setUp() {
-        maps = new ArrayList<IMap<Integer,Integer>>();
+        maps = new ArrayList<IMap<Integer, Integer>>();
 
         for (int i = 0; i < expirableMapCount; i++) {
-            maps.add(targetInstance.<Integer, Integer>getMap(expirableMapPrefix + name + i));
+            maps.add(targetInstance.<Integer, Integer>getMap(EXPIRABLE_MAP_PREFIX + mapName(i)));
         }
 
         for (int i = 0; i < notExpirableMapCount; i++) {
-            maps.add(targetInstance.<Integer, Integer>getMap(notExpirableMapCount + name + i));
+            maps.add(targetInstance.<Integer, Integer>getMap(mapName(i)));
         }
+    }
+
+    private String mapName(int i) {
+        return name + i;
     }
 
     @Prepare(global = false)
@@ -75,19 +81,15 @@ public class IntIntMapTest extends HazelcastTest {
         }
     }
 
-    IMap<Integer,Integer> getRandomMap(ThreadState state) {
-        return maps.get(state.randomInt(expirableMapCount + notExpirableMapCount));
-    }
-
     @TimeStep(prob = 0.1)
     public Integer keySet(ThreadState state) {
-        Set<Integer> keySet = getRandomMap(state).keySet();
+        Set<Integer> keySet = state.randomMap().keySet();
         return keySet.size();
     }
 
     @TimeStep(prob = 0.1)
     public Integer entrySet(ThreadState state) {
-        Set<Map.Entry<Integer, Integer>> entrySet = getRandomMap(state).entrySet();
+        Set<Map.Entry<Integer, Integer>> entrySet = state.randomMap().entrySet();
         return entrySet.size();
     }
 
@@ -95,20 +97,20 @@ public class IntIntMapTest extends HazelcastTest {
     public Integer put(ThreadState state) {
         int key = state.randomKey();
         int value = state.randomValue();
-        return getRandomMap(state).put(key, value);
+        return state.randomMap().put(key, value);
     }
 
     @TimeStep(prob = 0)
     public void set(ThreadState state) {
         int key = state.randomKey();
         int value = state.randomValue();
-        getRandomMap(state).set(key, value);
+        state.randomMap().set(key, value);
     }
 
     @TimeStep(prob = -1)
     public Integer get(ThreadState state) {
         int key = state.randomKey();
-        return getRandomMap(state).get(key);
+        return state.randomMap().get(key);
     }
 
     public class ThreadState extends BaseThreadState {
@@ -119,6 +121,10 @@ public class IntIntMapTest extends HazelcastTest {
 
         private int randomValue() {
             return randomInt(Integer.MAX_VALUE);
+        }
+
+        private IMap<Integer, Integer> randomMap() {
+            return maps.get(randomInt(expirableMapCount + notExpirableMapCount));
         }
     }
 }
