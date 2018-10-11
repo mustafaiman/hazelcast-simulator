@@ -40,6 +40,8 @@ public class IntIntMapTest extends HazelcastTest {
     public static final String EXPIRABLE_MAP_PREFIX = "expirable.";
 
     // properties
+    public int hotKeyCount = 100;
+    public boolean useHotKey = true;
     public int keyCount = 1000000;
     public int expirableMapCount = 5;
     public int minNumberOfMembers = 0;
@@ -125,7 +127,7 @@ public class IntIntMapTest extends HazelcastTest {
     public class ThreadState extends BaseThreadState {
 
         private int randomKey() {
-            return keys[randomInt(keys.length)];
+            return useHotKey ? keys[randomInt(hotKeyCount)] : keys[randomInt(keys.length)];
         }
 
         private int randomValue() {
