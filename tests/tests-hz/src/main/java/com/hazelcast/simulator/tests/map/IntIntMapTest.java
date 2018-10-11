@@ -26,6 +26,7 @@ import com.hazelcast.simulator.worker.loadsupport.Streamer;
 import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -53,12 +54,18 @@ public class IntIntMapTest extends HazelcastTest {
         maps = new ArrayList<IMap<Integer, Integer>>();
 
         for (int i = 0; i < expirableMapCount; i++) {
-            maps.add(targetInstance.<Integer, Integer>getMap(EXPIRABLE_MAP_PREFIX + mapName(i)));
+            String mapName = EXPIRABLE_MAP_PREFIX + mapName(i);
+            logger.info("map created with name=" + mapName);
+            maps.add(targetInstance.<Integer, Integer>getMap(mapName));
         }
 
         for (int i = 0; i < notExpirableMapCount; i++) {
+            String mapName = mapName(i);
+            logger.info("map created with name=" + mapName);
             maps.add(targetInstance.<Integer, Integer>getMap(mapName(i)));
         }
+
+        Collections.shuffle(maps);
     }
 
     private String mapName(int i) {
@@ -78,6 +85,8 @@ public class IntIntMapTest extends HazelcastTest {
                 streamer.pushEntry(key, value);
             }
             streamer.await();
+
+            logger.info("map name=" + map.getName() + " has size=" + map.size());
         }
     }
 
