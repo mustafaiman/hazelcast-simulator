@@ -33,6 +33,7 @@ import com.hazelcast.simulator.worker.loadsupport.Streamer;
 import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.hazelcast.query.misonparser.StructuralIndex;
+import com.hazelcast.query.misonparser.StructuralIndexFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -86,7 +87,7 @@ public class JsonTest extends HazelcastTest {
             }
         } else if (Strategy.valueOf(strategy) == Strategy.STRUCTURAL_INDEX) {
             for (String key : strings) {
-                StructuralIndex o = new StructuralIndex(createJsonObject(key).toString(), 3);
+                StructuralIndex o = StructuralIndexFactory.create(createJsonObject(key).toString(), 3);
                 streamer.pushEntry(key, o);
             }
         } else {
@@ -118,6 +119,7 @@ public class JsonTest extends HazelcastTest {
         o.setDoubleVal(nextDouble(0.0, Double.MAX_VALUE));
         o.setLongVal(nextLong(0, 500));
         o.setIntVal(nextInt(0, Integer.MAX_VALUE));
+        o.setLongStringField("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Arcu felis bibendum ut tristique et egestas quis ipsum. Dapibus ultrices in iaculis nunc. Libero justo laoreet sit amet. Scelerisque mauris pellentesque pulvinar pellentesque habitant morbi tristique. Eget velit aliquet sagittis id. Sit amet massa vitae tortor condimentum lacinia. Fermentum et sollicitudin ac orci phasellus egestas tellus. Adipiscing tristique risus nec feugiat in fermentum posuere urna nec. Praesent tristique magna sit amet purus gravida quis blandit turpis. Faucibus purus in massa tempor nec feugiat nisl pretium. At urna condimentum mattis pellentesque id nibh tortor id aliquet. Sit amet aliquam id diam maecenas ultricies mi eget. Amet consectetur adipiscing elit ut aliquam purus. Hendrerit dolor magna eget est. Amet commodo nulla facilisi nullam vehicula ipsum a arcu. Lobortis feugiat vivamus at augue eget arcu dictum varius. Quam viverra orci sagittis eu volutpat odio facilisis mauris sit.");
         return o;
     }
 
@@ -129,6 +131,7 @@ public class JsonTest extends HazelcastTest {
         o.set("doubleVal", nextDouble(0.0, Double.MAX_VALUE));
         o.set("longVal", nextLong(0, 500));
         o.set("intVal", nextInt(0, Integer.MAX_VALUE));
+        o.set("longStringField", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Arcu felis bibendum ut tristique et egestas quis ipsum. Dapibus ultrices in iaculis nunc. Libero justo laoreet sit amet. Scelerisque mauris pellentesque pulvinar pellentesque habitant morbi tristique. Eget velit aliquet sagittis id. Sit amet massa vitae tortor condimentum lacinia. Fermentum et sollicitudin ac orci phasellus egestas tellus. Adipiscing tristique risus nec feugiat in fermentum posuere urna nec. Praesent tristique magna sit amet purus gravida quis blandit turpis. Faucibus purus in massa tempor nec feugiat nisl pretium. At urna condimentum mattis pellentesque id nibh tortor id aliquet. Sit amet aliquam id diam maecenas ultricies mi eget. Amet consectetur adipiscing elit ut aliquam purus. Hendrerit dolor magna eget est. Amet commodo nulla facilisi nullam vehicula ipsum a arcu. Lobortis feugiat vivamus at augue eget arcu dictum varius. Quam viverra orci sagittis eu volutpat odio facilisis mauris sit.");
         return o;
     }
 
