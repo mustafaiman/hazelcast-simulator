@@ -16,9 +16,9 @@
 package com.hazelcast.simulator.tests.map;
 
 import com.hazelcast.core.IMap;
-import com.hazelcast.json.Json;
-import com.hazelcast.json.JsonObject;
-import com.hazelcast.json.JsonValue;
+import com.hazelcast.internal.json.Json;
+import com.hazelcast.internal.json.JsonObject;
+import com.hazelcast.internal.json.JsonValue;
 import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
 import com.hazelcast.simulator.test.annotations.Prepare;

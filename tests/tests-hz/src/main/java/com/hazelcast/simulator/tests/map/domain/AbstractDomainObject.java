@@ -24,6 +24,7 @@ abstract class AbstractDomainObject implements DomainObject, Serializable {
     double doubleVal;
     long longVal;
     int intVal;
+    String longStringField;
 
     @Override
     public String getKey() {
@@ -73,6 +74,16 @@ abstract class AbstractDomainObject implements DomainObject, Serializable {
     @Override
     public void setIntVal(int intVal) {
         this.intVal = intVal;
+    }
+
+    @Override
+    public String getLongStringField() {
+        return longStringField;
+    }
+
+    @Override
+    public void setLongStringField(String utfField) {
+        this.longStringField = utfField;
     }
 
     @Override

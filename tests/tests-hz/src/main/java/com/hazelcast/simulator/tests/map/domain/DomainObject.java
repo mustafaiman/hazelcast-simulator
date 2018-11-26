@@ -37,4 +37,8 @@ public interface DomainObject {
     int getIntVal();
 
     void setIntVal(int intVal);
+
+    String getLongStringField();
+
+    void setLongStringField(String utfField);
 }

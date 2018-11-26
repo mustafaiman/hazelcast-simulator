@@ -30,6 +30,7 @@ public class DataSerializableDomainObject extends AbstractDomainObject implement
         out.writeDouble(doubleVal);
         out.writeLong(longVal);
         out.writeInt(intVal);
+        out.writeUTF(longStringField);
     }
 
     @Override
@@ -39,5 +40,6 @@ public class DataSerializableDomainObject extends AbstractDomainObject implement
         doubleVal = in.readDouble();
         longVal = in.readLong();
         intVal = in.readInt();
+        longStringField = in.readUTF();
     }
 }

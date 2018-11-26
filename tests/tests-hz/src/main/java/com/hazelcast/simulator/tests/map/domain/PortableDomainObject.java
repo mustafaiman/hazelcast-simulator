@@ -42,6 +42,7 @@ public class PortableDomainObject extends AbstractDomainObject implements Portab
         out.writeDouble("doubleVal", doubleVal);
         out.writeLong("longVal", longVal);
         out.writeInt("intVal", intVal);
+        out.writeUTF("longStringField", longStringField);
     }
 
     @Override
@@ -51,5 +52,6 @@ public class PortableDomainObject extends AbstractDomainObject implements Portab
         doubleVal = in.readDouble("doubleVal");
         longVal = in.readLong("longVal");
         intVal = in.readInt("intVal");
+        longStringField = in.readUTF("longStringField");
     }
 }

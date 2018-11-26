@@ -16,9 +16,9 @@
 package com.hazelcast.simulator.tests.map;
 
 import com.hazelcast.core.IMap;
-import com.hazelcast.json.Json;
-import com.hazelcast.json.JsonObject;
-import com.hazelcast.json.JsonValue;
+import com.hazelcast.internal.json.Json;
+import com.hazelcast.internal.json.JsonObject;
+import com.hazelcast.internal.json.JsonValue;
 import com.hazelcast.query.Predicates;
 import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
@@ -32,6 +32,7 @@ import com.hazelcast.simulator.utils.ThrottlingLogger;
 import com.hazelcast.simulator.worker.loadsupport.Streamer;
 import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 import org.apache.commons.lang3.RandomStringUtils;
+import com.hazelcast.query.misonparser.StructuralIndex;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,7 +50,8 @@ public class JsonTest extends HazelcastTest {
         SERIALIZABLE,
         DATA_SERIALIZABLE,
         IDENTIFIED_DATA_SERIALIZABLE,
-        JSON
+        JSON,
+        STRUCTURAL_INDEX
     }
 
     // properties
@@ -70,7 +72,7 @@ public class JsonTest extends HazelcastTest {
 
     @Prepare(global = true)
     public void prepare() {
-        throttlingLogger.info(strategy + " " + targetInstance.getConfig().getMapConfig(mapname).getInMemoryFormat() + " " + mapname + " " + useIndex + " " + itemCount);
+        throttlingLogger.info(strategy + " " + mapname + " " + useIndex + " " + itemCount);
         if (useIndex) {
             map.addIndex("stringVam", false);
         }
@@ -80,6 +82,11 @@ public class JsonTest extends HazelcastTest {
         if (Strategy.valueOf(strategy) == Strategy.JSON) {
             for (String key : strings) {
                 JsonValue o = createJsonObject(key);
+                streamer.pushEntry(key, o.toString());
+            }
+        } else if (Strategy.valueOf(strategy) == Strategy.STRUCTURAL_INDEX) {
+            for (String key : strings) {
+                StructuralIndex o = new StructuralIndex(createJsonObject(key).toString(), 3);
                 streamer.pushEntry(key, o);
             }
         } else {
