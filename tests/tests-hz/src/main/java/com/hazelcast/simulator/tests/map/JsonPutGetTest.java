@@ -26,7 +26,12 @@ import com.hazelcast.simulator.test.annotations.Setup;
 import com.hazelcast.simulator.test.annotations.Teardown;
 import com.hazelcast.simulator.test.annotations.TimeStep;
 import com.hazelcast.simulator.tests.helpers.KeyLocality;
-import com.hazelcast.simulator.tests.map.domain.DomainObject;
+import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
+import com.hazelcast.simulator.tests.map.domain.MetadataCreator;
+import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
+import com.hazelcast.simulator.tests.map.domain.SampleFactory;
+import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
+import com.hazelcast.simulator.tests.map.domain.TweetObject;
 import com.hazelcast.simulator.tests.map.domain.DomainObjectFactory;
 import com.hazelcast.simulator.utils.ThrottlingLogger;
 import com.hazelcast.simulator.worker.loadsupport.Streamer;
@@ -118,34 +123,14 @@ public class JsonPutGetTest extends HazelcastTest {
     }
 
     private Object createObject() {
+        SampleFactory factory;
+        MetadataCreator creator = new MetadataCreator();
         if (JsonTest.Strategy.valueOf(strategy) == JsonTest.Strategy.JSON) {
-            return createJsonObject("key");
+            factory = new JsonSampleFactory(new TweetJsonFactory(), creator);
         } else {
             DomainObjectFactory objectFactory = DomainObjectFactory.newFactory(JsonTest.Strategy.valueOf(strategy));
-            return createNewDomainObject(objectFactory, "key");
+            factory = new ObjectSampleFactory(objectFactory, creator);
         }
+        return factory.create();
     }
-
-    private DomainObject createNewDomainObject(DomainObjectFactory objectFactory, String key) {
-        DomainObject o = objectFactory.newInstance();
-        o.setKey(key);
-        o.setStringVam(randomAlphanumeric(7));
-        o.setDoubleVal(nextDouble(0.0, Double.MAX_VALUE));
-        o.setLongVal(nextLong(0, 500));
-        o.setIntVal(nextInt(0, Integer.MAX_VALUE));
-        return o;
-    }
-
-
-    private JsonValue createJsonObject(String key) {
-        JsonObject o = Json.object();
-        o.set("key", key);
-        o.set("stringVam", randomAlphanumeric(7));
-        o.set("doubleVal", nextDouble(0.0, Double.MAX_VALUE));
-        o.set("longVal", nextLong(0, 500));
-        o.set("intVal", nextInt(0, Integer.MAX_VALUE));
-        return o;
-    }
-
-
 }
