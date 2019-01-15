@@ -16,9 +16,6 @@
 package com.hazelcast.simulator.tests.map;
 
 import com.hazelcast.core.IMap;
-import com.hazelcast.internal.json.Json;
-import com.hazelcast.internal.json.JsonObject;
-import com.hazelcast.internal.json.JsonValue;
 import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
 import com.hazelcast.simulator.test.annotations.Prepare;
@@ -31,7 +28,6 @@ import com.hazelcast.simulator.tests.map.domain.MetadataCreator;
 import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.SampleFactory;
 import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
-import com.hazelcast.simulator.tests.map.domain.TweetObject;
 import com.hazelcast.simulator.tests.map.domain.DomainObjectFactory;
 import com.hazelcast.simulator.utils.ThrottlingLogger;
 import com.hazelcast.simulator.worker.loadsupport.Streamer;
@@ -40,16 +36,12 @@ import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 import java.util.Random;
 
 import static com.hazelcast.simulator.tests.helpers.KeyUtils.generateIntKeys;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomUtils.nextDouble;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
-import static org.apache.commons.lang3.RandomUtils.nextLong;
 
-public class JsonPutGetTest extends HazelcastTest {
+public class PutGetPerfTest extends HazelcastTest {
 
 
     // properties
-    public String strategy = JsonTest.Strategy.PORTABLE.name();
+    public String strategy = QueryPerformanceTest.Strategy.PORTABLE.name();
     public int itemCount = 100000;
     public boolean useIndex = false;
     public String mapname = "default";
@@ -125,10 +117,10 @@ public class JsonPutGetTest extends HazelcastTest {
     private Object createObject() {
         SampleFactory factory;
         MetadataCreator creator = new MetadataCreator();
-        if (JsonTest.Strategy.valueOf(strategy) == JsonTest.Strategy.JSON) {
+        if (QueryPerformanceTest.Strategy.valueOf(strategy) == QueryPerformanceTest.Strategy.JSON) {
             factory = new JsonSampleFactory(new TweetJsonFactory(), creator);
         } else {
-            DomainObjectFactory objectFactory = DomainObjectFactory.newFactory(JsonTest.Strategy.valueOf(strategy));
+            DomainObjectFactory objectFactory = DomainObjectFactory.newFactory(QueryPerformanceTest.Strategy.valueOf(strategy));
             factory = new ObjectSampleFactory(objectFactory, creator);
         }
         return factory.create();

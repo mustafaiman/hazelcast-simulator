@@ -1,7 +1,9 @@
 package com.hazelcast.simulator.tests.map.domain;
 
+import com.hazelcast.core.HazelcastJsonValue;
 import com.hazelcast.internal.json.Json;
 import com.hazelcast.internal.json.JsonValue;
+import com.hazelcast.json.HazelcastJson;
 
 public class TweetJsonFactory {
 

@@ -18,21 +18,17 @@ package com.hazelcast.simulator.tests.map;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.IMap;
 import com.hazelcast.query.Predicates;
-import com.hazelcast.query.json.AttributeIndex;
-import com.hazelcast.query.misonparser.StructuralIndex;
 import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
 import com.hazelcast.simulator.test.annotations.BeforeRun;
 import com.hazelcast.simulator.test.annotations.Prepare;
 import com.hazelcast.simulator.test.annotations.Setup;
 import com.hazelcast.simulator.test.annotations.TimeStep;
-import com.hazelcast.simulator.tests.map.domain.AttributeIndexSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.DomainObjectFactory;
 import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.MetadataCreator;
 import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.SampleFactory;
-import com.hazelcast.simulator.tests.map.domain.StructuralIndexSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
 import com.hazelcast.simulator.utils.ThrottlingLogger;
 import com.hazelcast.simulator.worker.loadsupport.Streamer;
@@ -44,16 +40,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class JsonTest extends HazelcastTest {
+public class QueryPerformanceTest extends HazelcastTest {
 
     public enum Strategy {
         PORTABLE,
         SERIALIZABLE,
         DATA_SERIALIZABLE,
         IDENTIFIED_DATA_SERIALIZABLE,
-        JSON,
-        STRUCTURAL_INDEX,
-        ATTRIBUTE_INDEX
+        JSON
     }
 
     // properties
@@ -91,10 +85,6 @@ public class JsonTest extends HazelcastTest {
         MetadataCreator metadataCreator = new MetadataCreator();
         if (Strategy.valueOf(strategy) == Strategy.JSON) {
             factory = new JsonSampleFactory(new TweetJsonFactory(), metadataCreator);
-        } else if (Strategy.valueOf(strategy) == Strategy.STRUCTURAL_INDEX) {
-            factory = new StructuralIndexSampleFactory(new JsonSampleFactory(new TweetJsonFactory(), metadataCreator));
-        } else if (Strategy.valueOf(strategy) == Strategy.ATTRIBUTE_INDEX) {
-            factory = new AttributeIndexSampleFactory(new JsonSampleFactory(new TweetJsonFactory(), metadataCreator));
         } else {
             DomainObjectFactory objectFactory = DomainObjectFactory.newFactory(Strategy.valueOf(strategy));
             factory = new ObjectSampleFactory(objectFactory, metadataCreator);
@@ -124,14 +114,5 @@ public class JsonTest extends HazelcastTest {
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
         Collection<Object> val = map.values(Predicates.equal(predicateLeft, predicateRight));
-    }
-
-    public static void main(String[] args) {
-        MetadataCreator metadataCreator = new MetadataCreator();
-        SampleFactory factory = new AttributeIndexSampleFactory(new JsonSampleFactory(new TweetJsonFactory(), metadataCreator));
-
-        for (int i = 0; i < 10; i++) {
-            System.out.println(((AttributeIndex)factory.create()).asString());
-        }
     }
 }

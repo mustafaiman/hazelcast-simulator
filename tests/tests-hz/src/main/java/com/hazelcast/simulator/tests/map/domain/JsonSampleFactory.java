@@ -1,5 +1,8 @@
 package com.hazelcast.simulator.tests.map.domain;
 
+import com.hazelcast.core.HazelcastJsonValue;
+import com.hazelcast.json.HazelcastJson;
+
 public class JsonSampleFactory implements SampleFactory {
 
     private TweetJsonFactory factory;
@@ -11,7 +14,7 @@ public class JsonSampleFactory implements SampleFactory {
     }
 
     @Override
-    public String create() {
+    public HazelcastJsonValue create() {
         factory.setUrl(creator.getUrl());
         factory.setText(creator.getText());
         factory.setScreenName(creator.getScreenName());
@@ -21,6 +24,6 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return factory.buildJsonText();
+        return HazelcastJson.fromString(factory.buildJsonText());
     }
 }
