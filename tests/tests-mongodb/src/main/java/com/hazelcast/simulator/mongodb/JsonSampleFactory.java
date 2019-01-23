@@ -1,20 +1,19 @@
-package com.hazelcast.simulator.tests.map.domain;
+package com.hazelcast.simulator.mongodb;
 
-import com.hazelcast.core.HazelcastJsonValue;
-import com.hazelcast.json.HazelcastJson;
+import org.bson.Document;
 
-public class JsonSampleFactory implements SampleFactory {
+public class JsonSampleFactory {
 
-    private TweetJsonFactory factory;
+    private TweetDocumentFactory factory;
     private AttributeCreator creator;
 
-    public JsonSampleFactory(TweetJsonFactory factory, AttributeCreator creator) {
+    public JsonSampleFactory(TweetDocumentFactory factory, AttributeCreator creator) {
         this.factory = factory;
         this.creator = creator;
     }
 
-    @Override
-    public HazelcastJsonValue create() {
+    public Document create(int recordId) {
+        factory.setRecordId(recordId);
         factory.setUrl(creator.getUrl());
         factory.setText(creator.getText());
         factory.setScreenName(creator.getScreenName());
@@ -24,6 +23,6 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.buildJsonText());
+        return factory.build();
     }
 }

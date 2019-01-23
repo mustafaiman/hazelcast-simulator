@@ -1,9 +1,8 @@
-package com.hazelcast.simulator.tests.map.domain;
+package com.hazelcast.simulator.mongodb;
 
-import com.hazelcast.internal.json.Json;
-import com.hazelcast.internal.json.JsonValue;
+import org.bson.Document;
 
-public class TweetJsonFactory {
+public class TweetDocumentFactory {
 
     protected String createdAt;
     protected String idStr;
@@ -22,6 +21,8 @@ public class TweetJsonFactory {
     protected String url;
     protected String description;
     // </user>
+
+    protected int recordId;
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
@@ -63,23 +64,28 @@ public class TweetJsonFactory {
         this.description = description;
     }
 
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
+
     public String buildJsonText() {
         return build().toString();
     }
 
-    public JsonValue build() {
-        return Json.object()
-                .add("createdAt", createdAt)
-                .add("idStr", idStr)
-                .add("text", text)
-                .add("user", Json.object()
-                        .add("id", id)
-                        .add("name", name)
-                        .add("screenName", screenName)
-                        .add("location", Json.object()
-                                .add("country", country)
-                                .add("city", city))
-                        .add("url", url)
-                        .add("description", description));
+    public Document build() {
+        return new Document()
+                .append("_id", recordId)
+                .append("createdAt", createdAt)
+                .append("idStr", idStr)
+                .append("text", text)
+                .append("user", new Document()
+                        .append("id", id)
+                        .append("name", name)
+                        .append("screenName", screenName)
+                        .append("location", new Document()
+                                .append("country", country)
+                                .append("city", city))
+                        .append("url", url)
+                        .append("description", description));
     }
 }

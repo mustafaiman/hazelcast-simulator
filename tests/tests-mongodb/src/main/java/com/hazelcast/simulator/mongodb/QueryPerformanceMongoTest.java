@@ -13,60 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hazelcast.simulator.tests.map;
+package com.hazelcast.simulator.mongodb;
 
-import com.hazelcast.core.IMap;
-import com.hazelcast.query.Predicates;
-import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
+import com.hazelcast.simulator.test.annotations.AfterRun;
 import com.hazelcast.simulator.test.annotations.BeforeRun;
 import com.hazelcast.simulator.test.annotations.Prepare;
 import com.hazelcast.simulator.test.annotations.Setup;
+import com.hazelcast.simulator.test.annotations.Teardown;
 import com.hazelcast.simulator.test.annotations.TimeStep;
-import com.hazelcast.simulator.tests.map.domain.DomainObjectFactory;
-import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
-import com.hazelcast.simulator.tests.map.domain.AttributeCreator;
-import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
-import com.hazelcast.simulator.tests.map.domain.SampleFactory;
-import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
 import com.hazelcast.simulator.utils.ThrottlingLogger;
-import com.hazelcast.simulator.worker.loadsupport.Streamer;
-import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Indexes;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.Document;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class QueryPerformanceTest extends HazelcastTest {
-
-    public enum Strategy {
-        PORTABLE,
-        SERIALIZABLE,
-        DATA_SERIALIZABLE,
-        IDENTIFIED_DATA_SERIALIZABLE,
-        JSON
-    }
+public class QueryPerformanceMongoTest extends MongodbTest {
 
     // properties
-    public String strategy = Strategy.PORTABLE.name();
     public int itemCount = 100000;
     public boolean useIndex = false;
-    public String mapname = "default";
     public String predicate = "createdAt=sancar";
+    public String databaseName = "test";
+    public String collectionName = "queryingTest";
 
     private String predicateLeft;
     private String predicateRight;
 
     private final ThrottlingLogger throttlingLogger = ThrottlingLogger.newLogger(logger, 5000);
-    private IMap<Integer, Object> map;
+    private MongoCollection<Document> collection;
     private Set<String> uniqueStrings;
 
     @Setup
     public void setUp() {
-        map = targetInstance.getMap(mapname);
-        uniqueStrings = targetInstance.getSet(mapname);
+        MongoDatabase database = client.getDatabase(databaseName);
+        collection = database.getCollection(collectionName);
+
+
         String[] pred = predicate.split("=");
         predicateLeft = pred[0];
         predicateRight = pred[1];
@@ -74,25 +65,19 @@ public class QueryPerformanceTest extends HazelcastTest {
 
     @Prepare(global = true)
     public void prepare() {
-        throttlingLogger.info(strategy + " " + mapname + " " + useIndex + " " + itemCount + " " + predicateLeft + " " + predicateRight);
+        throttlingLogger.info(collectionName + " " + useIndex + " " + itemCount + " " + predicateLeft + " " + predicateRight);
         if (useIndex) {
-            map.addIndex(predicateLeft, false);
+            collection.createIndex(Indexes.ascending(predicateLeft));
         }
 
-        Streamer<Integer, Object> streamer = StreamerFactory.getInstance(map);
-        SampleFactory factory;
         AttributeCreator attributeCreator = new AttributeCreator();
-        if (Strategy.valueOf(strategy) == Strategy.JSON) {
-            factory = new JsonSampleFactory(new TweetJsonFactory(), attributeCreator);
-        } else {
-            DomainObjectFactory objectFactory = DomainObjectFactory.newFactory(Strategy.valueOf(strategy));
-            factory = new ObjectSampleFactory(objectFactory, attributeCreator);
-        }
+        TweetDocumentFactory tweetFactory = new TweetDocumentFactory();
+        JsonSampleFactory sampleFactory = new JsonSampleFactory(tweetFactory, attributeCreator);
+
+
         for (int i = 0; i < itemCount; i++) {
-            Object o = factory.create();
-            streamer.pushEntry(i, o);
+            collection.insertOne(sampleFactory.create(i));
         }
-        streamer.await();
     }
 
     private String[] generateUniqueStrings(int uniqueStringsCount) {
@@ -112,6 +97,22 @@ public class QueryPerformanceTest extends HazelcastTest {
 
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
-        map.keySet(Predicates.equal(predicateLeft, predicateRight)).size();
+        long foundDocs = collection.countDocuments(new BasicDBObject(predicateLeft, predicateRight));
     }
+
+    @Teardown
+    public void tearDown() {
+        collection.drop();
+    }
+
+    private static final Block<Document> nothingBlock = new Block<Document>() {
+        @Override
+        public void apply(Document document) {
+            if (document != null) {
+                System.out.println(document.toString());
+            } else {
+                System.out.println("a");
+            }
+        }
+    };
 }

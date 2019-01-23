@@ -24,7 +24,7 @@ import com.hazelcast.simulator.test.annotations.Teardown;
 import com.hazelcast.simulator.test.annotations.TimeStep;
 import com.hazelcast.simulator.tests.helpers.KeyLocality;
 import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
-import com.hazelcast.simulator.tests.map.domain.MetadataCreator;
+import com.hazelcast.simulator.tests.map.domain.AttributeCreator;
 import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.SampleFactory;
 import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
@@ -116,7 +116,7 @@ public class PutGetPerfTest extends HazelcastTest {
 
     private Object createObject() {
         SampleFactory factory;
-        MetadataCreator creator = new MetadataCreator();
+        AttributeCreator creator = new AttributeCreator();
         if (QueryPerformanceTest.Strategy.valueOf(strategy) == QueryPerformanceTest.Strategy.JSON) {
             factory = new JsonSampleFactory(new TweetJsonFactory(), creator);
         } else {

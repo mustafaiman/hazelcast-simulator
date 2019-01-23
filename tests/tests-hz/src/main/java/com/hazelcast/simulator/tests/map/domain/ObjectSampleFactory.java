@@ -3,9 +3,9 @@ package com.hazelcast.simulator.tests.map.domain;
 public class ObjectSampleFactory implements SampleFactory {
 
     private DomainObjectFactory factory;
-    private MetadataCreator creator;
+    private AttributeCreator creator;
 
-    public ObjectSampleFactory(DomainObjectFactory factory, MetadataCreator creator) {
+    public ObjectSampleFactory(DomainObjectFactory factory, AttributeCreator creator) {
         this.factory = factory;
         this.creator = creator;
     }

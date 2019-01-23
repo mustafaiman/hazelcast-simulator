@@ -1,4 +1,4 @@
-package com.hazelcast.simulator.tests.map.domain;
+package com.hazelcast.simulator.mongodb;
 
 import java.util.Date;
 import java.util.Random;
@@ -6,7 +6,7 @@ import java.util.Random;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 
-public class MetadataCreator {
+public class AttributeCreator {
 
     private static final String[] COUNTRIES = new String[] {
             "UK", "US", "TR", "CZ", "FR"
