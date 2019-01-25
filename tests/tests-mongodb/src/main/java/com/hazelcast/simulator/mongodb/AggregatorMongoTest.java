@@ -26,15 +26,18 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Indexes;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class QueryPerformanceMongoTest extends MongodbTest {
+public class AggregatorMongoTest extends MongodbTest {
 
     // properties
     public int itemCount = 100000;
@@ -42,6 +45,7 @@ public class QueryPerformanceMongoTest extends MongodbTest {
     public String predicate = "createdAt=sancar";
     public String databaseName = "test";
     public String collectionName = "queryingTest";
+    public String preferredSize = "";
 
     private String predicateLeft;
     private String predicateRight;
@@ -70,7 +74,12 @@ public class QueryPerformanceMongoTest extends MongodbTest {
 
         AttributeCreator attributeCreator = new AttributeCreator();
         TweetDocumentFactory tweetFactory = new TweetDocumentFactory();
-        JsonSampleFactory sampleFactory = new JsonSampleFactory(tweetFactory, attributeCreator);
+        JsonSampleFactory sampleFactory = null;
+        if (preferredSize.equals("16MB")) {
+            sampleFactory = new JsonSample16MBFactory(tweetFactory, attributeCreator);
+        } else {
+            sampleFactory = new JsonSampleFactory(tweetFactory, attributeCreator);
+        }
 
 
         for (int i = 0; i < itemCount; i++) {
@@ -95,12 +104,10 @@ public class QueryPerformanceMongoTest extends MongodbTest {
 
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
-        collection.find(new BasicDBObject(predicateLeft, predicateRight)).forEach(new Block<Document>() {
-            @Override
-            public void apply(Document document) {
-                document.get("_id");
-            }
-        });
+        collection.aggregate(Arrays.asList(
+                Aggregates.match(Filters.exists(predicateLeft)),
+                Aggregates.count()
+        )).first();
     }
 
     @Teardown

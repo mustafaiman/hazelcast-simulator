@@ -23,9 +23,9 @@ import com.hazelcast.simulator.test.annotations.BeforeRun;
 import com.hazelcast.simulator.test.annotations.Prepare;
 import com.hazelcast.simulator.test.annotations.Setup;
 import com.hazelcast.simulator.test.annotations.TimeStep;
+import com.hazelcast.simulator.tests.map.domain.AttributeCreator;
 import com.hazelcast.simulator.tests.map.domain.DomainObjectFactory;
 import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
-import com.hazelcast.simulator.tests.map.domain.AttributeCreator;
 import com.hazelcast.simulator.tests.map.domain.ObjectSampleFactory;
 import com.hazelcast.simulator.tests.map.domain.SampleFactory;
 import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
@@ -50,7 +50,7 @@ public class QueryPerformanceTest extends HazelcastTest {
     }
 
     // properties
-    public String strategy = Strategy.PORTABLE.name();
+    public String strategy = Strategy.JSON.name();
     public int itemCount = 100000;
     public boolean useIndex = false;
     public String mapname = "default";
@@ -112,6 +112,9 @@ public class QueryPerformanceTest extends HazelcastTest {
 
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
-        map.keySet(Predicates.equal(predicateLeft, predicateRight)).size();
+        Collection collection = map.keySet(Predicates.equal(predicateLeft, predicateRight));
+        for (Object object: collection) {
+            //nothing
+        }
     }
 }

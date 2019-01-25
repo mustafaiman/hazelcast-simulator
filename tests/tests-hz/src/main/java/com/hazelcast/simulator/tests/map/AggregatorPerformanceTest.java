@@ -13,49 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hazelcast.simulator.mongodb;
+package com.hazelcast.simulator.tests.map;
 
+import com.hazelcast.aggregation.Aggregators;
+import com.hazelcast.core.IMap;
+import com.hazelcast.simulator.hz.HazelcastTest;
 import com.hazelcast.simulator.test.BaseThreadState;
 import com.hazelcast.simulator.test.annotations.BeforeRun;
 import com.hazelcast.simulator.test.annotations.Prepare;
 import com.hazelcast.simulator.test.annotations.Setup;
-import com.hazelcast.simulator.test.annotations.Teardown;
 import com.hazelcast.simulator.test.annotations.TimeStep;
+import com.hazelcast.simulator.tests.map.domain.AttributeCreator;
+import com.hazelcast.simulator.tests.map.domain.JsonSample16MBFactory;
+import com.hazelcast.simulator.tests.map.domain.JsonSampleFactory;
+import com.hazelcast.simulator.tests.map.domain.SampleFactory;
+import com.hazelcast.simulator.tests.map.domain.TweetJsonFactory;
 import com.hazelcast.simulator.utils.ThrottlingLogger;
-import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Indexes;
+import com.hazelcast.simulator.worker.loadsupport.Streamer;
+import com.hazelcast.simulator.worker.loadsupport.StreamerFactory;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.bson.Document;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
-public class QueryPerformanceMongoTest extends MongodbTest {
+public class AggregatorPerformanceTest extends HazelcastTest {
 
     // properties
+    public String strategy = null;
     public int itemCount = 100000;
     public boolean useIndex = false;
+    public String mapname = "default";
     public String predicate = "createdAt=sancar";
-    public String databaseName = "test";
-    public String collectionName = "queryingTest";
+    public String preferredSize = "";
 
     private String predicateLeft;
     private String predicateRight;
 
     private final ThrottlingLogger throttlingLogger = ThrottlingLogger.newLogger(logger, 5000);
-    private MongoCollection<Document> collection;
+    private IMap<Integer, Object> map;
     private Set<String> uniqueStrings;
 
     @Setup
     public void setUp() {
-        MongoDatabase database = client.getDatabase(databaseName);
-        collection = database.getCollection(collectionName);
-
-
+        map = targetInstance.getMap(mapname);
+        uniqueStrings = targetInstance.getSet(mapname);
         String[] pred = predicate.split("=");
         predicateLeft = pred[0];
         predicateRight = pred[1];
@@ -63,19 +66,24 @@ public class QueryPerformanceMongoTest extends MongodbTest {
 
     @Prepare(global = true)
     public void prepare() {
-        throttlingLogger.info(collectionName + " " + useIndex + " " + itemCount + " " + predicateLeft + " " + predicateRight);
+        throttlingLogger.info(strategy + " " + mapname + " " + useIndex + " " + itemCount + " " + predicateLeft + " " + predicateRight);
         if (useIndex) {
-            collection.createIndex(Indexes.ascending(predicateLeft));
+            map.addIndex(predicateLeft, false);
         }
 
+        Streamer<Integer, Object> streamer = StreamerFactory.getInstance(map);
+        SampleFactory factory;
         AttributeCreator attributeCreator = new AttributeCreator();
-        TweetDocumentFactory tweetFactory = new TweetDocumentFactory();
-        JsonSampleFactory sampleFactory = new JsonSampleFactory(tweetFactory, attributeCreator);
-
-
-        for (int i = 0; i < itemCount; i++) {
-            collection.insertOne(sampleFactory.create(i));
+        if (preferredSize.equals("16MB")) {
+            factory = new JsonSample16MBFactory(new TweetJsonFactory(), attributeCreator);
+        } else {
+            factory = new JsonSampleFactory(new TweetJsonFactory(), attributeCreator);
         }
+        for (int i = 0; i < itemCount; i++) {
+            Object o = factory.create();
+            streamer.pushEntry(i, o);
+        }
+        streamer.await();
     }
 
     private String[] generateUniqueStrings(int uniqueStringsCount) {
@@ -95,16 +103,6 @@ public class QueryPerformanceMongoTest extends MongodbTest {
 
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
-        collection.find(new BasicDBObject(predicateLeft, predicateRight)).forEach(new Block<Document>() {
-            @Override
-            public void apply(Document document) {
-                document.get("_id");
-            }
-        });
-    }
-
-    @Teardown
-    public void tearDown() {
-        collection.drop();
+        map.aggregate(Aggregators.<Map.Entry<Integer, Object>>count(predicateLeft));
     }
 }

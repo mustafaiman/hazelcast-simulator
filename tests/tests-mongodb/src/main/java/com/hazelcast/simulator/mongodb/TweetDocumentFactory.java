@@ -22,6 +22,8 @@ public class TweetDocumentFactory {
     protected String description;
     // </user>
 
+    protected String gibberish = "";
+
     protected int recordId;
 
     public void setCreatedAt(String createdAt) {
@@ -75,6 +77,7 @@ public class TweetDocumentFactory {
     public Document build() {
         return new Document()
                 .append("_id", recordId)
+                .append("gibberish", gibberish)
                 .append("createdAt", createdAt)
                 .append("idStr", idStr)
                 .append("text", text)
