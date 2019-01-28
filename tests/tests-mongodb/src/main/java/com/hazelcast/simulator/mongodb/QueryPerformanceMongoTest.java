@@ -27,6 +27,7 @@ import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Projections;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 
@@ -95,7 +96,7 @@ public class QueryPerformanceMongoTest extends MongodbTest {
 
     @TimeStep(prob = 1)
     public void getByStringIndex(BaseThreadState state) {
-        collection.find(new BasicDBObject(predicateLeft, predicateRight)).forEach(new Block<Document>() {
+        collection.find(new BasicDBObject(predicateLeft, predicateRight)).projection(Projections.include("_id")).forEach(new Block<Document>() {
             @Override
             public void apply(Document document) {
                 document.get("_id");
