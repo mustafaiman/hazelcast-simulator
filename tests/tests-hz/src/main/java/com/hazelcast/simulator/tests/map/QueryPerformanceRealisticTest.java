@@ -1,7 +1,7 @@
 package com.hazelcast.simulator.tests.map;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.config.PreprocessingPolicy;
+import com.hazelcast.config.MetadataPolicy;
 import com.hazelcast.core.Client;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -121,12 +121,12 @@ public class QueryPerformanceRealisticTest extends HazelcastTest {
         pickRandomMap().get(random.nextInt(minEntriesPerMap));
     }
 
-    @TimeStep(prob = 0.1)
+    @TimeStep(prob = 0.2)
     public void put() {
         pickRandomMap().put(random.nextInt(minEntriesPerMap), jsonSampleFactory.create());
     }
 
-    @TimeStep(prob = 0.8)
+    @TimeStep(prob = 0.6)
     public void values() {
         pickRandomMap().values(Predicates.equal(predicateLeft, predicateRight)).size();
     }
@@ -134,7 +134,7 @@ public class QueryPerformanceRealisticTest extends HazelcastTest {
     public static void main(String[] args) {
         JsonSampleFactory f = new JsonSampleFactory(new TweetJsonFactory(), new AttributeCreator());
         Config config = new Config();
-        config.getMapConfig("default").setPreprocessingPolicy(PreprocessingPolicy.CREATION_TIME);
+        config.getMapConfig("default").setMetadataPolicy(MetadataPolicy.CREATE_ON_UPDATE);
         config.getMapConfig("default").setBackupCount(1);
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(config);
         IMap map = instance.getMap("a");

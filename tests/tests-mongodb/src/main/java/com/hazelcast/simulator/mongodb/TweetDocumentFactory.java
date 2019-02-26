@@ -2,7 +2,27 @@ package com.hazelcast.simulator.mongodb;
 
 import org.bson.Document;
 
+import java.util.Arrays;
+
 public class TweetDocumentFactory {
+
+    private static final String garbage9KB;
+    private static final String garbage99KB;
+    private static final String garbage999KB;
+
+    static {
+        char[] nineKB = new char[9 * 1024];
+        Arrays.fill(nineKB, 'a');
+        garbage9KB = new String(nineKB);
+
+        char[] ninetynineKB = new char[99 * 1024];
+        Arrays.fill(ninetynineKB, 'a');
+        garbage99KB = new String(ninetynineKB);
+
+        char[] nnnKB = new char[999 * 1024];
+        Arrays.fill(nnnKB, 'a');
+        garbage999KB = new String(nnnKB);
+    }
 
     protected String createdAt;
     protected String idStr;
@@ -75,9 +95,11 @@ public class TweetDocumentFactory {
     }
 
     public Document build() {
-        return new Document()
-                .append("_id", recordId)
-                .append("gibberish", gibberish)
+        Document doc = new Document();
+        if (recordId > -1) {
+            doc.append("_id", recordId);
+        }
+        doc.append("gibberish", gibberish)
                 .append("createdAt", createdAt)
                 .append("idStr", idStr)
                 .append("text", text)
@@ -90,5 +112,75 @@ public class TweetDocumentFactory {
                                 .append("city", city))
                         .append("url", url)
                         .append("description", description));
+        return doc;
+    }
+
+    public Document build10KB() {
+        Document doc = new Document();
+        if (recordId > -1) {
+            doc.append("_id", recordId);
+        }
+        doc
+                .append("gibberish", gibberish)
+                .append("createdAt", createdAt)
+                .append("idStr", idStr)
+                .append("text", text)
+                .append("user", new Document()
+                        .append("id", id)
+                        .append("name", name)
+                        .append("screenName", screenName)
+                        .append("location", new Document()
+                                .append("garbage", garbage9KB)
+                                .append("country", country)
+                                .append("city", city))
+                        .append("url", url)
+                        .append("description", description));
+        return doc;
+    }
+
+    public Document build100KB() {
+        Document doc = new Document();
+        if (recordId > -1) {
+            doc.append("_id", recordId);
+        }
+        doc
+                .append("gibberish", gibberish)
+                .append("createdAt", createdAt)
+                .append("idStr", idStr)
+                .append("text", text)
+                .append("garbage", garbage99KB)
+                .append("user", new Document()
+                        .append("id", id)
+                        .append("name", name)
+                        .append("screenName", screenName)
+                        .append("location", new Document()
+                                .append("country", country)
+                                .append("city", city))
+                        .append("url", url)
+                        .append("description", description));
+        return doc;
+    }
+
+    public Document build1000KB() {
+        Document doc = new Document();
+        if (recordId > -1) {
+            doc.append("_id", recordId);
+        }
+        doc
+                .append("gibberish", gibberish)
+                .append("createdAt", createdAt)
+                .append("idStr", idStr)
+                .append("text", text)
+                .append("user", new Document()
+                        .append("id", id)
+                        .append("garbage", garbage999KB)
+                        .append("name", name)
+                        .append("screenName", screenName)
+                        .append("location", new Document()
+                                .append("country", country)
+                                .append("city", city))
+                        .append("url", url)
+                        .append("description", description));
+        return doc;
     }
 }
