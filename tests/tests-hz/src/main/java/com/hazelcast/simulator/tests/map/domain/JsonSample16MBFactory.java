@@ -1,7 +1,6 @@
 package com.hazelcast.simulator.tests.map.domain;
 
 import com.hazelcast.core.HazelcastJsonValue;
-import com.hazelcast.json.HazelcastJson;
 
 public class JsonSample16MBFactory extends JsonSampleFactory {
 
@@ -36,6 +35,6 @@ public class JsonSample16MBFactory extends JsonSampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.buildJsonText());
+        return new HazelcastJsonValue(factory.buildJsonText());
     }
 }

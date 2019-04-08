@@ -1,7 +1,6 @@
 package com.hazelcast.simulator.tests.map.domain;
 
 import com.hazelcast.core.HazelcastJsonValue;
-import com.hazelcast.json.HazelcastJson;
 
 public class JsonSampleFactory implements SampleFactory {
 
@@ -24,7 +23,7 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.buildJsonText());
+        return new HazelcastJsonValue(factory.buildJsonText());
     }
 
     public HazelcastJsonValue create10KB() {
@@ -37,7 +36,7 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.build10KB().toString());
+        return new HazelcastJsonValue(factory.build10KB().toString());
     }
 
     public HazelcastJsonValue create100KB() {
@@ -50,7 +49,7 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.build100KB().toString());
+        return new HazelcastJsonValue(factory.build100KB().toString());
     }
 
     public HazelcastJsonValue create1000KB() {
@@ -63,6 +62,6 @@ public class JsonSampleFactory implements SampleFactory {
         factory.setCreatedAt(creator.getCreatedAt());
         factory.setCity(creator.getCity());
         factory.setCountry(creator.getCountry());
-        return HazelcastJson.fromString(factory.build1000KB().toString());
+        return new HazelcastJsonValue(factory.build1000KB().toString());
     }
 }
